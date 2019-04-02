@@ -15,6 +15,7 @@ const DB_NAME = ""
 const DB_USER = ""
 const DB_PASSWORD = ""
 const KNOT_TBL = "pl_knot"
+const KNOT_MEMBERS_TBL="pl_knot_members"
 const ALBUM_TBL = "pl_album"
 const MOMENT_TBL = "pl_moment"
 const LIKE_TBL = "pl_like"
@@ -144,10 +145,154 @@ func (r Repository) newNotification(notification Notification) bool {
 
 	return true
 }
+func (r Repository) joinKnot(member KnotMember) bool{
+	db := dbConnect()
 
+	stmt,err := db.Prepare("INSERT INTO "+KNOT_MEMBERS_TBL +" (id,knot_id,user_id,added_at) VALUES(?,?,?,?)")
+
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt.Exec(member.ID,member.KnotId,member.UserId,member.AddedAt)
+
+	defer db.Close()
+	fmt.Println("Joined a group")
+
+	return true
+}
 func (r Repository) getKnots(userId string) Knots{
 	results := Knots{}
 
 	db := dbConnect()
 
+	stmt,err := db.Query("SELECT k.id,k.name,k.cover_image,k.is_default,k.created_at,k.created_by FROM "+KNOT_TBL+" k INNER JOIN "+KNOT_MEMBERS_TBL+" km ON k.id=km.knot_id WHERE created_by=?",userId)
+	if err != nil {
+		panic(err.Error())
+	}
+	for stmt.Next(){
+		var knot Knot
+		err := stmt.Scan(&knot.ID,knot.Name,knot.CoverImage,knot.IsDefaultKnot,knot.CreatedAt,knot.CreatedBy)
+		if err != nil {
+			panic(err.Error())
+		}
+		results = append(results,knot)
+	}
+
+	defer db.Close()
+	
+	return results
+}
+func (r Repository) getAlbums(knot Knot) Albums{
+	results := Albums{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT id,name,cover_image,is_timeline_album,created_by,created_at FROM "+ALBUM_TBL+" WHERE knot_id=?",knot.ID)
+	if err!= nil{
+		panic(err.Error())
+	}
+	for stmt.Next() {
+		var album Album
+		err := stmt.Scan(&album.ID,&album.Name,&album.CoverImage,&album.IsTimelineAlbum,&album.CreatedBy,&album.CreatedAt)
+		if err != nil {
+			panic(err.Error())
+		}
+		results = append(results,album)
+	}
+
+	defer db.Close()
+
+	return results
+}
+func (r Repository) getMoments(album Album) Moments{
+	results := Moments{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT id,caption,photo_url,likes,created_by,created_at FROM "+MOMENT_TBL+" WHERE album_id=?",album.ID)
+	if err != nil {
+		panic(err.Error())
+	}
+	for stmt.Next(){
+		var moment Moment
+		if err != nil {
+			panic(err.Error())
+		}
+		results = append(results,moment)
+	}
+	defer db.Close()
+
+	return results
+}
+func (r Repository) getLikes(moment Moment) Users{
+	results := Users{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT u.fullname FROM "+LIKE_TBL+" l INNER JOIN "+USER_TBL+" u ON l.liked_by=a.id WHERE moment_id=?",moment.ID)
+	if err != nil {
+		panic(err.Error())
+	}
+	for stmt.Next() {
+		var user User
+		results = append(results, user)
+	}
+	defer db.Close()
+
+	return results
+}
+func (r Repository) getComments(moment Moment) Comments{
+	results := Comments{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT c.id,c.comment,c.comment_at,u.fullname FROM "+COMMENT_TBL+" c INNER JOIN "+USER_TBL+" u ON c.comment_by=u.id WHERE moment_id=?",moment.ID)
+	if err != nil {
+		panic(err.Error())
+	}
+	for stmt.Next()  {
+		var comment MomentComment
+		results = append(results,comment)
+	}
+	defer db.Close()
+
+	return results
+
+}
+func (r Repository) getNotifications(userId string)  Notifications{
+	results := Notifications{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT id,notification_text,notification_type,created_at FROM "+NOTIFICATION_TBL+" WHERE notification_to=?",userId)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for stmt.Next(){
+		var notification Notification
+		results = append(results,notification)
+	}
+	defer db.Close()
+
+	return results
+}
+func (r Repository) getKnotMembers(knot Knot) Users{
+	results := Users{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT u.id,u.fullname,u.profilePhoto,u.default_knot FROM "+KNOT_MEMBERS_TBL+" k INNER JOIN "+USER_TBL+" u ON k.user_id=u.id WHERE k.knot_id=?",knot.ID)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for stmt.Next(){
+		var user User
+		results = append(results,user)
+	}
+	defer db.Close()
+
+	return results
 }
