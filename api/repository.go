@@ -47,6 +47,37 @@ func (r Repository) newKnot(knot Knot) bool {
 
 	return true
 }
+func (r Repository) newUser(user User) bool {
+	db := dbConnect()
+
+	stmt, err := db.Prepare("INSERT INTO " + USER_TBL + " (id,full_name,default_knot,created_at) VALUES(?,?,?,?,?,?)")
+
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt.Exec(user.ID, user.FullName,user.DefaultKnot,user.CreatedAt)
+
+	defer db.Close()
+
+	fmt.Println("Added a new User")
+
+	return true
+}
+func (r Repository) UpdateProfilePhoto(user User) bool {
+
+	db := dbConnect()
+
+	stmt, err := db.Prepare("UPDATE " + USER_TBL + " SET profile_photo=? WHERE id=?")
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt.Exec(user.ProfilePhoto,user.ID)
+
+	defer db.Close()
+
+	fmt.Println("Updated Profile Photo")
+	return true
+}
 func (r Repository) newAlbum(album Album) bool {
 	db := dbConnect()
 
@@ -182,12 +213,12 @@ func (r Repository) getKnots(userId string) Knots{
 	
 	return results
 }
-func (r Repository) getAlbums(knot Knot) Albums{
+func (r Repository) getAlbums(knotId string) Albums{
 	results := Albums{}
 
 	db := dbConnect()
 
-	stmt,err := db.Query("SELECT id,name,cover_image,is_timeline_album,created_by,created_at FROM "+ALBUM_TBL+" WHERE knot_id=?",knot.ID)
+	stmt,err := db.Query("SELECT id,name,cover_image,is_timeline_album,created_by,created_at FROM "+ALBUM_TBL+" WHERE knot_id=?",knotId)
 	if err!= nil{
 		panic(err.Error())
 	}
@@ -204,12 +235,12 @@ func (r Repository) getAlbums(knot Knot) Albums{
 
 	return results
 }
-func (r Repository) getMoments(album Album) Moments{
+func (r Repository) getMoments(albumId string) Moments{
 	results := Moments{}
 
 	db := dbConnect()
 
-	stmt,err := db.Query("SELECT id,caption,photo_url,likes,created_by,created_at FROM "+MOMENT_TBL+" WHERE album_id=?",album.ID)
+	stmt,err := db.Query("SELECT id,caption,photo_url,likes,created_by,created_at FROM "+MOMENT_TBL+" WHERE album_id=?",albumId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -224,12 +255,12 @@ func (r Repository) getMoments(album Album) Moments{
 
 	return results
 }
-func (r Repository) getLikes(moment Moment) Users{
+func (r Repository) getLikes(momentId string) Users{
 	results := Users{}
 
 	db := dbConnect()
 
-	stmt,err := db.Query("SELECT u.fullname FROM "+LIKE_TBL+" l INNER JOIN "+USER_TBL+" u ON l.liked_by=a.id WHERE moment_id=?",moment.ID)
+	stmt,err := db.Query("SELECT u.fullname FROM "+LIKE_TBL+" l INNER JOIN "+USER_TBL+" u ON l.liked_by=a.id WHERE moment_id=?",momentId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -241,12 +272,12 @@ func (r Repository) getLikes(moment Moment) Users{
 
 	return results
 }
-func (r Repository) getComments(moment Moment) Comments{
+func (r Repository) getComments(momentId string) Comments{
 	results := Comments{}
 
 	db := dbConnect()
 
-	stmt,err := db.Query("SELECT c.id,c.comment,c.comment_at,u.fullname FROM "+COMMENT_TBL+" c INNER JOIN "+USER_TBL+" u ON c.comment_by=u.id WHERE moment_id=?",moment.ID)
+	stmt,err := db.Query("SELECT c.id,c.comment,c.comment_at,u.fullname FROM "+COMMENT_TBL+" c INNER JOIN "+USER_TBL+" u ON c.comment_by=u.id WHERE moment_id=?",momentId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -277,12 +308,12 @@ func (r Repository) getNotifications(userId string)  Notifications{
 
 	return results
 }
-func (r Repository) getKnotMembers(knot Knot) Users{
+func (r Repository) getKnotMembers(knotId string) Users{
 	results := Users{}
 
 	db := dbConnect()
 
-	stmt,err := db.Query("SELECT u.id,u.fullname,u.profilePhoto,u.default_knot FROM "+KNOT_MEMBERS_TBL+" k INNER JOIN "+USER_TBL+" u ON k.user_id=u.id WHERE k.knot_id=?",knot.ID)
+	stmt,err := db.Query("SELECT u.id,u.fullname,u.profilePhoto,u.default_knot FROM "+KNOT_MEMBERS_TBL+" k INNER JOIN "+USER_TBL+" u ON k.user_id=u.id WHERE k.knot_id=?",knotId)
 
 	if err != nil {
 		panic(err.Error())

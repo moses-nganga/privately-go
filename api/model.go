@@ -40,7 +40,7 @@ type MomentComment struct {
 	ID string `json:"id"`
 	MomentId string `json:"moment_id"`
 	Comment string `json:"comment"`
-	CommentAt string `json:"comment_at"`
+	CommentAt time.Time `json:"comment_at"`
 	CommentBy string `json:"comment_by"`
 	CommentParent string `json:"comment_parent"`
 }
@@ -49,7 +49,7 @@ type Feed struct {
 	Actor string `json:"actor"`
 	Verb string `json:"verb"`
 	Moments []Moment `json:"moments"`
-	CreatedAt string `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 } 
 type Notification struct {
 	ID string `json:"id"`
