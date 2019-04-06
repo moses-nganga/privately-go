@@ -308,7 +308,7 @@ func (r Repository) getNotifications(userId string)  Notifications{
 
 	return results
 }
-func (r Repository) getKnotMembers(knotId string) Users{
+func (r Repository) GetKnotMembers(knotId string) Users{
 	results := Users{}
 
 	db := dbConnect()

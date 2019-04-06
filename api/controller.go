@@ -497,7 +497,7 @@ func (c *Controller) GetKnotMembers(w http.ResponseWriter,r *http.Request)  {
 	vars := mux.Vars(r)
 	knotMemberId := vars["id"]
 	//Get this users knots
-	members := c.repository.getKnotMembers(knotMemberId)
+	members := c.repository.GetKnotMembers(knotMemberId)
 	//Marshal then into JSON
 	data,_:=json.Marshal(members)
 	//Setup the Response
@@ -553,7 +553,7 @@ func (c *Controller) GetComments(w http.ResponseWriter,r *http.Request)  {
 	vars := mux.Vars(r)
 	momentId := vars["id"]
 	//Get this moments comments
-	comments := c.repository.getKnotMembers(momentId)
+	comments := c.repository.getComments(momentId)
 	//Marshal then into JSON
 	data,_:=json.Marshal(comments)
 	//Setup the Response
@@ -565,7 +565,7 @@ func (c *Controller) GetComments(w http.ResponseWriter,r *http.Request)  {
 }
 func (c *Controller) GetNotifications(w http.ResponseWriter,r *http.Request)  {
 	//Get this users knots
-	notifications := c.repository.getKnotMembers(user.ID)
+	notifications := c.repository.getNotifications(user.ID)
 	//Marshal then into JSON
 	data,_:=json.Marshal(notifications)
 	//Setup the Response
