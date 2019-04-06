@@ -125,6 +125,18 @@ var routes = Routes{
 		"v0/get-notifications",
 		Authenticate(controller.GetNotifications),
 	},
+	Route{
+		"GetFeed",
+		"GET",
+		"v0/get-feed",
+		Authenticate(controller.GetFeed),
+	},
+	Route{
+		"Explore",
+		"GET",
+		"v0/explore",
+		Authenticate(controller.Explore),
+	},
 }
 
 func NewRouter() *mux.Router  {

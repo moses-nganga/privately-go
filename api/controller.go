@@ -481,6 +481,19 @@ func (c *Controller) UpdateProfilePhoto(w http.ResponseWriter,r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	return
 }
+func (c *Controller) GetFeed(w http.ResponseWriter,r *http.Request)  {
+	//Get this users feeds
+	feed := c.repository.getFeed(user.ID)
+	//Marshal then into JSON
+	data,_:=json.Marshal(feed)
+	//Setup the Response
+	w.Header().Set("Content-Type","application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin","*")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+	return
+}
+
 func (c *Controller) GetKnots(w http.ResponseWriter,r *http.Request)  {
 	//Get this users knots
 	knots := c.repository.getKnots(user.ID)
@@ -568,6 +581,18 @@ func (c *Controller) GetNotifications(w http.ResponseWriter,r *http.Request)  {
 	notifications := c.repository.getNotifications(user.ID)
 	//Marshal then into JSON
 	data,_:=json.Marshal(notifications)
+	//Setup the Response
+	w.Header().Set("Content-Type","application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin","*")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+	return
+}
+func (c *Controller) Explore(w http.ResponseWriter,r *http.Request)  {
+	//Get random moments
+	moments := c.repository.explore(user.ID)
+	//Marshal then into JSON
+	data,_:=json.Marshal(moments)
 	//Setup the Response
 	w.Header().Set("Content-Type","application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin","*")

@@ -48,9 +48,18 @@ type Feed struct {
 	ID string `json:"id"`
 	Actor string `json:"actor"`
 	Verb string `json:"verb"`
-	Moments []Moment `json:"moments"`
+	Moment string `json:"moment_id"`
 	CreatedAt time.Time `json:"created_at"`
-} 
+}
+type Item struct {
+	ID string `json:"id"`
+	Actor string `json:"actor"`
+	Verb string `json:"verb"`
+	Moment string `json:"moment_id"`
+	Caption string `json:"caption"`
+	Photo  string `json:"photo"`
+	CreatedAt time.Time `json:"created_at"`
+}
 type Notification struct {
 	ID string `json:"id"`
 	NotificationText string `json:"notification_text"`
@@ -79,4 +88,5 @@ type Moments []Moment
 type Comments []MomentComment
 type Likes []MomentLike
 type Albums []Album
-type Knots []Knot 
+type Knots []Knot
+type Items []Item

@@ -147,12 +147,12 @@ func (r Repository) newComment(comment MomentComment) bool {
 func (r Repository) newFeed(feed Feed) bool {
 	db := dbConnect()
 
-	stmt, err := db.Prepare("INSERT INTO " + FEED_TBL + " (id,actor,verb,moments,created_at) VALUES(?,?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO " + FEED_TBL + " (id,actor,verb,moment_id,created_at) VALUES(?,?,?,?)")
 
 	if err != nil {
 		panic(err.Error())
 	}
-	stmt.Exec(feed.ID, feed.Actor, feed.Verb, feed.Moments, feed.CreatedAt)
+	stmt.Exec(feed.ID, feed.Actor, feed.Verb, feed.Moment, feed.CreatedAt)
 
 	defer db.Close()
 
@@ -308,6 +308,24 @@ func (r Repository) getNotifications(userId string)  Notifications{
 
 	return results
 }
+func (r Repository) getFeed(userId string)  Items{
+	results := Items{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT f.id,f.actor,f.verb,f.moment_id,m.caption,m.photo_url,f.created_at FROM "+FEED_TBL+" INNER JOIN "+MOMENT_TBL+" m ON f.moment_id=m.id WHERE m.created_by=?",userId)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for stmt.Next(){
+		var item Item
+		results = append(results,item)
+	}
+	defer db.Close()
+
+	return results
+}
 func (r Repository) GetKnotMembers(knotId string) Users{
 	results := Users{}
 
@@ -322,6 +340,26 @@ func (r Repository) GetKnotMembers(knotId string) Users{
 	for stmt.Next(){
 		var user User
 		results = append(results,user)
+	}
+	defer db.Close()
+
+	return results
+}
+func (r Repository) explore(userId string) Moments{
+	results := Moments{}
+
+	db := dbConnect()
+
+	stmt,err := db.Query("SELECT m.id,m.caption,m.photo_url,m.likes,m.created_by,m.created_at FROM "+MOMENT_TBL+" m INNER JOIN "+ALBUM_TBL+" a ON m.album_id=a.id INNER JOIN "+KNOT_MEMBERS_TBL+" k ON a.knot_id=k.id WHERE k.user_id=? ORDER BY RAND() LIMIT 200",userId)
+	if err != nil {
+		panic(err.Error())
+	}
+	for stmt.Next(){
+		var moment Moment
+		if err != nil {
+			panic(err.Error())
+		}
+		results = append(results,moment)
 	}
 	defer db.Close()
 
