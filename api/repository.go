@@ -10,10 +10,10 @@ import (
 type Repository struct {
 }
 
-const DB_SERVER = ""
-const DB_NAME = ""
-const DB_USER = ""
-const DB_PASSWORD = ""
+const DB_SERVER = "fnx6frzmhxw45qcb.cbetxkdyhwsb.us-east-1.rds.amazonaws.com"
+const DB_NAME = "mq2nzp21vayc85l6"
+const DB_USER = "grv12hh0j4qbi6oo"
+const DB_PASSWORD = "zc6zojohv5019wa5"
 const KNOT_TBL = "pl_knot"
 const KNOT_MEMBERS_TBL="pl_knot_members"
 const ALBUM_TBL = "pl_album"
@@ -163,7 +163,7 @@ func (r Repository) newFeed(feed Feed) bool {
 func (r Repository) newNotification(notification Notification) bool {
 	db := dbConnect()
 
-	stmt, err := db.Prepare("INSERT INTO " + NOTIFICATION_TBL + " (id,notificationText,notificationType,notificationTo,createdAt) VALUES(?,?,?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO " + NOTIFICATION_TBL + " (id,notification_text,notification_type,notification_to,created_at) VALUES(?,?,?,?,?)")
 
 	if err != nil {
 		panic(err.Error())
